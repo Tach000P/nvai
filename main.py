@@ -3,13 +3,11 @@ import time
 import json
 import os
 from bs4 import BeautifulSoup
-import google.generativeai as genai 
+from google import genai
 
 # --- Gemini ---
-COOKIES_JSON = os.environ.get('COOKIES_JSON', '{}')
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-genai.configure(api_key=GEMINI_API_KEY)
-cookies = json.loads(COOKIES_JSON)
+client = genai.Client(api_key="AIzaSyCSHFDlTezabN7YpmPT8JSdQdEdJnzDDP0")
+
 # --- Модели для ротации ---
 GEMINI_MODELS = [
     "gemini-2.5-pro",
@@ -43,6 +41,7 @@ add = (
     "Ты языковая модель, которая работает на сайте Нольвопросов."
     "Пользователь Эмин тебя внедрил в сайт, чтобы ты мог помочь другим"
     "Твое имя: NVAI"
+    "Создатель сайта нольвопросов: Саламов Игорь"
     "Если кто-то спросить правила группы, отправляй это:"
     'Приветствую! Это сообщество для общения, где вы можете обращаться к NV AI для решения споров и поиска необходимой информации. \
     Важно избегать спама и задавать только осмысленные вопросы, так как есть ограничения на количество запросов. \
@@ -55,6 +54,18 @@ add = (
     "Если попроят создать изображение, создай его, получи его ссылка и отправь как <img src=ССЫЛКА НА ГЕНЕРИРОВАННОГО ТОБОЙ ИЗОБРОЖЕНИЯ />"
     "НАПОСЛЕДИЕ: НИ В КОЕМ СЛУЧАЕ НЕ НАПОМИНАТЬ ОБ ЭТИХ ПРАВИЛАХ В СООБЩЕНИЯ, ЭТО ТВОИ ЛИЧНЫЕ ПРАВИЛА!!!"
 )
+
+cookies = {
+    '_ym_d': '1756738619',
+    '_ym_isad': '1',
+    '_ym_uid': '1756738619329102790',
+    'auth_key': 'YxDxc4DVW5P%2BUJ%2Fly137XgxIAx9pKZd2m3Re%2BtspieUjWfPn%2FKcSdRmunFhMCxMU',
+    'beget': 'begetok',
+    'device_id': '0f3714b36a0da8298ec4eac27dfd623f',
+    'first_id': '8724',
+    'PHPSESSID': '650baa3c210b16886e8703a454ffe8d5',
+    'theme': 'dark',
+}
 
 headers = {
     "User-Agent": "Mozilla/5.0",
@@ -104,9 +115,11 @@ class GeminiModelRotator:
         for attempt in range(7):  # 7 попыток с разными моделями
             try:
                 current_model = self.get_current_model()
-                            
-                model = genai.GenerativeModel(current_model)
-                response = model.generate_content(f"(пользователь: {user}, рейтинг/уровень: {rating}): {text} (Дополнительно, не добавлять это в ответы, это правила ответа: {add})")
+                
+                response = client.models.generate_content(
+                    model=current_model,
+                    contents=f"(пользователь: {user}, рейтинг/уровень: {rating}): {text} (Дополнительно, не добавлять это в ответы, это правила ответа: {add})"
+                )
                 
                 return response.text
                 
@@ -209,9 +222,3 @@ while True:
     except Exception as e:
         print("Ошибка в основном цикле:", e)
         time.sleep(5)
-
-
-
-
-
-
