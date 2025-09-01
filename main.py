@@ -9,7 +9,7 @@ from google import genai
 COOKIES_JSON = os.environ.get('COOKIES_JSON', '{}')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 client = genai.Client(api_key=f"{GEMINI_API_KEY}")
-cookies = COOKIES_JSON
+cookies = json.loads(COOKIES_JSON)
 # --- Модели для ротации ---
 GEMINI_MODELS = [
     "gemini-2.5-pro",
@@ -211,3 +211,4 @@ while True:
     except Exception as e:
         print("Ошибка в основном цикле:", e)
         time.sleep(5)
+
