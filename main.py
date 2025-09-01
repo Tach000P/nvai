@@ -3,7 +3,7 @@ import time
 import json
 import os
 from bs4 import BeautifulSoup
-from google import genai
+import google.generativeai as genai 
 
 # --- Gemini ---
 COOKIES_JSON = os.environ.get('COOKIES_JSON', '{}')
@@ -211,4 +211,5 @@ while True:
     except Exception as e:
         print("Ошибка в основном цикле:", e)
         time.sleep(5)
+
 
