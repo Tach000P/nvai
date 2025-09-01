@@ -104,9 +104,9 @@ class GeminiModelRotator:
         for attempt in range(7):  # 7 попыток с разными моделями
             try:
                 current_model = self.get_current_model()
-                
-               model = genai.GenerativeModel(current_model)
-               response = model.generate_content(f"(пользователь: {user}, рейтинг/уровень: {rating}): {text} (Дополнительно, не добавлять это в ответы, это правила ответа: {add})")
+                            
+                model = genai.GenerativeModel(current_model)
+                response = model.generate_content(f"(пользователь: {user}, рейтинг/уровень: {rating}): {text} (Дополнительно, не добавлять это в ответы, это правила ответа: {add})")
                 
                 return response.text
                 
@@ -209,6 +209,7 @@ while True:
     except Exception as e:
         print("Ошибка в основном цикле:", e)
         time.sleep(5)
+
 
 
 
