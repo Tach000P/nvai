@@ -8,7 +8,7 @@ import google.generativeai as genai
 # --- Gemini ---
 COOKIES_JSON = os.environ.get('COOKIES_JSON', '{}')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-client = genai.Client(api_key=f"{GEMINI_API_KEY}")
+genai.configure(api_key=GEMINI_API_KEY)
 cookies = json.loads(COOKIES_JSON)
 # --- Модели для ротации ---
 GEMINI_MODELS = [
@@ -105,10 +105,10 @@ class GeminiModelRotator:
             try:
                 current_model = self.get_current_model()
                 
-                response = client.models.generate_content(
-                    model=current_model,
-                    contents=f"(пользователь: {user}, рейтинг/уровень: {rating}): {text} (Дополнительно, не добавлять это в ответы, это правила ответа: {add})"
-                )
+               model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(
+                f"(пользователь: {user}, рейтинг/уровень: {rating}): {text} (Дополнительно, не добавлять это в ответы, это правила ответа: {add})"
+            )
                 
                 return response.text
                 
@@ -211,5 +211,6 @@ while True:
     except Exception as e:
         print("Ошибка в основном цикле:", e)
         time.sleep(5)
+
 
 
