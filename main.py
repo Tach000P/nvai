@@ -140,7 +140,6 @@ def get_last_message(group_id: int):
 
     return {
         "id": msg_id, 
-        "user_id": user_id, 
         "text": text, 
         "user": user_nick, 
         "rating": rating, 
