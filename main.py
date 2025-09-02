@@ -204,7 +204,7 @@ class GeminiModelRotator:
                 context += f"NVAI: {conv['response']}\n"
         
         prompt = f"""
-{context}
+ЭТО 3 последние сообщения. Если спросят про предыдушие сообщения - воспользуйся этим {context}
 Новое сообщение (пользователь: {user}, рейтинг: {rating}):
 {text}
 
