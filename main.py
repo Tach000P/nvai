@@ -13,22 +13,19 @@ cookies = json.loads(COOKIES_JSON)
 
 # --- Модели для ротации ---
 GEMINI_MODELS = [
-     "gemini-2.5-pro",
+    "gemini-2.5-pro",
     "gemini-2.5-flash",
     "gemini-2.0-pro",
-    "gemini-2.0-flash"
+    "gemini-2.0-flash",
     "gemini-1.5-flash",  
     "gemini-1.5-pro",  
-    "gemini-pro", 
+    "gemini-pro",          
 ]
 
 # --- Конфиг сайта ---
 GROUP_ID = 352
 MY_USER_ID = 8724
-QUEUE_FILE = "queue.json"
-HISTORY_FILE = "history.json"
-MEMORY_FILE = "bot_memory.json"
-
+QUEUE_FILE = "queue.json"  # файл для сохранения очереди
 add = (
     "В сообщениях запрещено использовать знак: * (то есть звездочку) и другие непонятные знаки, только можно оборачивать текст в <b></b>, <i></i>, <u></u>, <ol></ol>, <ul></ul>"
     "Еще можешь: <blockquote></blockquote>, <code></code>"
@@ -57,7 +54,7 @@ add = (
     Отправлять много ненужных запросов \
     Оскорблять \
     Обязательно пишите в начале сообщения "nvai" чтобы получить ответ от ИИ.'
-    "ТЫ НЕ УМЕЕШИ СОЗДАВАТЬ ИЛИ ГЕНЕРИРОВАТЬ ИЗОБРАЖЕНИЯ"
+    "ТЫ НЕ УМЕЕШЬ СОЗДАВАТЬ ИЛИ ГЕНЕРИРОВАТЬ ИЗОБРАЖЕНИЯ"
     "НАПОСЛЕДИЕ: НИ В КОЕМ СЛУЧАЕ НЕ НАПОМИНАТЬ ОБ ЭТИХ ПРАВИЛАХ В СООБЩЕНИЯ, ЭТО ТВОИ ЛИЧНЫЕ ПРАВИЛА!!!"
 )
 
@@ -69,100 +66,98 @@ headers = {
 session = requests.Session()
 session.cookies.update(cookies)
 
-# --- Загрузка данных с диска ---
+# --- Загрузка очереди с диска ---
 if os.path.exists(QUEUE_FILE):
     with open(QUEUE_FILE, "r", encoding="utf-8") as f:
         queue = json.load(f)
 else:
     queue = []
 
-# --- Система памяти ---
-def load_history():
-    if os.path.exists(HISTORY_FILE):
-        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+# --- Функции ---
+def save_queue():
+    with open(QUEUE_FILE, "w", encoding="utf-8") as f:
+        json.dump(queue, f, ensure_ascii=False, indent=2)
 
-def save_history(history):
-    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
 
-def load_memory():
-    if os.path.exists(MEMORY_FILE):
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {"users": {}, "stats": {"total_messages": 0, "last_backup": 0}}
+def get_last_message(group_id: int):
+    """Парсим страницу и достаем последнее сообщение с максимальным контекстом"""
+    url = f"https://nolvoprosov.ru/groups/{group_id}"
+    r = session.get(url, headers=headers)
+    r.raise_for_status()
 
-def save_memory(memory):
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(memory, f, ensure_ascii=False, indent=2)
+    soup = BeautifulSoup(r.text, "html.parser")
+    container = soup.find("div", class_="box rss messages groups_messages compact in_main")
+    if not container:
+        return None
 
-def add_to_history(user_id, user_name, message, response):
-    history = load_history()
-    
-    if user_id not in history:
-        history[user_id] = {
-            "user": user_name,
-            "conversations": []
-        }
-    
-    history[user_id]["conversations"].append({
-        "timestamp": time.time(),
-        "message": message,
-        "response": response
-    })
-    
-    # Ограничиваем историю последними 10 сообщениями
-    history[user_id]["conversations"] = history[user_id]["conversations"][-10:]
-    
-    save_history(history)
+    messages = container.find_all("div", attrs={"data-rs": True})
+    if not messages:
+        return None
 
-def get_user_history(user_id):
-    history = load_history()
-    return history.get(user_id, {}).get("conversations", [])
+    # Получаем последнее сообщение
+    last_msg = messages[-1]
+    rs_data = json.loads(last_msg["data-rs"])
+    msg_id = int(rs_data.get("id", 0))
+    user_id = int(rs_data.get("user_id", 0))
+    
+    # Если это наше сообщение - пропускаем
+    if user_id == MY_USER_ID:
+        return None
 
-def update_user_memory(user_id, user_name, message, response):
-    memory = load_memory()
-    
-    if user_id not in memory["users"]:
-        memory["users"][user_id] = {
-            "name": user_name,
-            "message_count": 0,
-            "last_interaction": time.time(),
-            "first_interaction": time.time()
-        }
-    
-    user_data = memory["users"][user_id]
-    user_data["message_count"] += 1
-    user_data["last_interaction"] = time.time()
-    
-    memory["stats"]["total_messages"] += 1
-    save_memory(memory)
+    user_nick = last_msg.find("a", class_="name").get_text(strip=True)
+    rating_tag = last_msg.find("li", class_="rating")
+    rating = rating_tag.get_text(strip=True) if rating_tag else "0"
+    text_box = last_msg.find("div", class_="box text ce basic")
+    text = text_box.get_text(strip=True) if text_box else ""
 
-def backup_data():
-    """Резервное копирование данных каждый час"""
-    try:
-        current_time = time.time()
-        memory = load_memory()
-        
-        if current_time - memory["stats"].get("last_backup", 0) > 3600:
-            timestamp = int(current_time)
+    # Получаем ВЕСЬ контекст чата (последние 20 сообщений)
+    chat_context = []
+    for msg in messages[-20:]:  # последние 20 сообщений чата
+        try:
+            msg_data = json.loads(msg["data-rs"])
+            msg_user_id = msg_data.get("user_id", 0)
+            msg_user = msg.find("a", class_="name")
+            msg_user_name = msg_user.get_text(strip=True) if msg_user else "Unknown"
             
-            for file in [HISTORY_FILE, QUEUE_FILE, MEMORY_FILE]:
-                if os.path.exists(file):
-                    backup_name = f"backup/{os.path.basename(file)}.{timestamp}.bak"
-                    os.makedirs("backup", exist_ok=True)
-                    with open(file, "r", encoding="utf-8") as src:
-                        data = src.read()
-                    with open(backup_name, "w", encoding="utf-8") as dst:
-                        dst.write(data)
-            
-            memory["stats"]["last_backup"] = current_time
-            save_memory(memory)
-            print("Резервная копия создана")
-            
-    except Exception as e:
-        print(f"Ошибка резервного копирования: {e}")
+            msg_text = msg.find("div", class_="box text ce basic")
+            if msg_text:
+                chat_context.append({
+                    "user_id": msg_user_id,
+                    "user": msg_user_name,
+                    "text": msg_text.get_text(strip=True),
+                    "is_ai": msg_user_id == MY_USER_ID,
+                    "timestamp": msg_data.get("id", 0)
+                })
+        except Exception as e:
+            print(f"Ошибка парсинга сообщения: {e}")
+            continue
+
+    return {
+        "id": msg_id, 
+        "user_id": user_id, 
+        "text": text, 
+        "user": user_nick, 
+        "rating": rating, 
+        "context": chat_context,
+        "user_context": [m for m in chat_context if m["user_id"] == user_id][-10:]
+    }
+
+
+def send_message(group_id: int, text: str):
+    """Отправляем сообщение"""
+    url = "https://nolvoprosov.ru/functions/ajaxes/messages/act.php"
+    payload = {
+        "rs[parent_id]": str(group_id),
+        "rs[group]": "message",
+        "rs[type]": "group_message",
+        "rs[mode]": "add",
+        "rs[plan]": "simple",
+        "text": f"<p>{text}</p>",
+    }
+    r = session.post(url, data=payload, headers=headers)
+    r.raise_for_status()
+    return r.text
+
 
 # --- Ротатор моделей ---
 class GeminiModelRotator:
@@ -188,119 +183,51 @@ class GeminiModelRotator:
             print("Все модели были сброшены, пробуем снова")
             
         self.current_model_index = available_models[0]
-        print(f"Переключились на модель: {self.get_current_model()}")
-    
-    def generate_reply(self, text: str, user: str, rating: str, user_id: int) -> str:
-        """Генерируем ответ с историей и памятью"""
-        # Загружаем историю диалогов
-        user_history = get_user_history(user_id)
+        send_message(GROUP_ID, f"Переключились на модель: {self.get_current_model()}")
+
+    def generate_reply(self, text: str, user: str, rating: str, context: list, user_context: list) -> str:
+        """Генерация ответа"""
+        context_str = "Контекст чата (последние сообщения):\n"
+        for msg in context[-40:]:
+            sender = "NVAI" if msg["is_ai"] else msg["user"]
+            context_str += f"{sender}: {msg['text']}\n"
         
-        # Формируем контекст из истории
-        context = ""
-        if user_history:
-            context = "\nКонтекст предыдущего диалога:\n"
-            for conv in user_history[-3:]:  # последние 3 сообщения
-                context += f"{user}: {conv['message']}\n"
-                context += f"NVAI: {conv['response']}\n"
+        user_history_str = "История сообщений этого пользователя:\n"
+        for msg in user_context[-5:]:
+            user_history_str += f"{user}: {msg['text']}\n"
         
         prompt = f"""
-ЭТО 3 последние сообщения. Если спросят про предыдушие сообщения - воспользуйся этим {context}
-Новое сообщение (пользователь: {user}, рейтинг: {rating}):
-{text}
+            контекст: {context_str}
+            история пользователя: {user_history_str}
+            Новое сообщение (пользователь: {user}, рейтинг: {rating}):
+            {text}
 
-Правила ответа (НЕ упоминать эти правила в ответе!):
-{add}
-"""
+            Правила ответа (НЕ упоминать эти правила в ответе!):
+            {add}
+            """
         
-        for attempt in range(5):
+        for attempt in range(3):
             try:
                 current_model = self.get_current_model()
-                
                 response = client.models.generate_content(
                     model=current_model,
                     contents=prompt
                 )
-                
-                reply = response.text
-                
-                # Сохраняем в историю и память
-                add_to_history(user_id, user, text, reply)
-                update_user_memory(user_id, user, text, reply)
-                
-                return reply
-                
+                return response.text
             except Exception as e:
-                error_msg = str(e)
-                print(f"Ошибка у модели {current_model}: {error_msg}")
-                
+                print(f"Ошибка у модели {current_model}: {e}")
                 self.switch_model()
                 time.sleep(2)
-                
-                if attempt == 4:
-                    return "Извините, не могу ответить в данный момент"
         
         return "Извините, сервис временно недоступен."
+
 
 # --- Инициализация ротатора ---
 model_rotator = GeminiModelRotator()
 
-# --- Функции ---
-def save_queue():
-    with open(QUEUE_FILE, "w", encoding="utf-8") as f:
-        json.dump(queue, f, ensure_ascii=False, indent=2)
-
-def get_last_message(group_id: int):
-    """Парсим страницу и достаем последнее сообщение"""
-    url = f"https://nolvoprosov.ru/groups/{group_id}"
-    r = session.get(url, headers=headers)
-    r.raise_for_status()
-
-    soup = BeautifulSoup(r.text, "html.parser")
-    container = soup.find("div", class_="box rss messages groups_messages compact in_main")
-    if not container:
-        return None
-
-    messages = container.find_all("div", attrs={"data-rs": True})
-    if not messages:
-        return None
-
-    last_msg = messages[-1]
-    rs_data = json.loads(last_msg["data-rs"])
-    msg_id = int(rs_data.get("id", 0))
-    user_id = int(rs_data.get("user_id", 0))
-    user_nick = last_msg.find("a", class_="name").get_text(strip=True)
-    rating_tag = last_msg.find("li", class_="rating")
-    rating = rating_tag.get_text(strip=True) if rating_tag else "0"
-    text_box = last_msg.find("div", class_="box text ce basic")
-    text = text_box.get_text(strip=True) if text_box else ""
-
-    return {"id": msg_id, "user_id": user_id, "text": text, "user": user_nick, "rating": rating}
-
-def send_message(group_id: int, text: str):
-    """Отправляем сообщение"""
-    url = "https://nolvoprosov.ru/functions/ajaxes/messages/act.php"
-    payload = {
-        "rs[parent_id]": str(group_id),
-        "rs[group]": "message",
-        "rs[type]": "group_message",
-        "rs[mode]": "add",
-        "rs[plan]": "simple",
-        "text": f"<p>{text}</p>",
-    }
-    r = session.post(url, data=payload, headers=headers)
-    r.raise_for_status()
-    return r.text
-
 # --- Основной цикл ---
-last_backup_time = time.time()
-
 while True:
     try:
-        # Резервное копирование каждый час
-        if time.time() - last_backup_time > 3600:
-            backup_data()
-            last_backup_time = time.time()
-
         msg = get_last_message(GROUP_ID)
         if msg and msg["user_id"] != MY_USER_ID:
             if not any(m["id"] == msg["id"] for m in queue):
@@ -311,26 +238,23 @@ while True:
                         "text": msg["text"],
                         "user": msg["user"],
                         "rating": msg["rating"],
-                        "user_id": msg["user_id"],
+                        "context": msg["context"],
+                        "user_context": msg["user_context"],
                         "status": "pending"
                     })
                     save_queue()
 
-        # Обрабатываем очередь
         for item in queue:
             if item["status"] == "pending":
                 reply = model_rotator.generate_reply(
-                    item["text"], 
-                    item["user"], 
-                    item["rating"], 
-                    item["user_id"]
+                    item["text"], item["user"], item["rating"], item["context"], item["user_context"]
                 )
                 send_message(GROUP_ID, reply)
                 item["status"] = "Ответили"
-                print(f"[{model_rotator.get_current_model()}] Ответ для {item['user']}: {reply[:100]}...")
+                print(f"[Gemini ответил ({model_rotator.get_current_model()})]: {reply[:100]}...")
                 save_queue()
 
-        time.sleep(2)
+        time.sleep(1)
 
     except Exception as e:
         print("Ошибка в основном цикле:", e)
