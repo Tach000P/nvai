@@ -248,6 +248,7 @@ while True:
                         "rating": msg["rating"],
                         "context": msg["context"],
                         "user_context": msg["user_context"],
+                        "user_id": msg["user_id"],
                         "status": "pending"
                     })
                     save_queue()
@@ -255,7 +256,7 @@ while True:
         for item in queue:
             if item["status"] == "pending":
                 reply = model_rotator.generate_reply(
-                    item["text"], item["user"], item["rating"], item["context"], item["user_context"]
+                    item["text"], item["user"], item["rating"], item["context"], item["user_context"], f"{item["user_id"]}"
                 )
                 send_message(GROUP_ID, reply)
                 item["status"] = "Ответили"
