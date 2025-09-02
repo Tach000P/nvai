@@ -205,7 +205,6 @@ class GeminiModelRotator:
         for msg in user_context[-5:]:
             user_history_str += f"{user}: {msg['text']}\n"
 
-        user_status
         if user_id == "7282":
             user_status = "Admin"
         else:
@@ -216,7 +215,7 @@ class GeminiModelRotator:
             Status=({user_status})
             контекст: {context_str}
             история пользователя: {user_history_str}
-            Новое сообщение (пользователь=({user}), рейтинг: {rating}):
+            Новое сообщение (пользователь: {user}, рейтинг: {rating}):
             {text}
 
             Правила ответа (НЕ упоминать эти правила в ответе!):
