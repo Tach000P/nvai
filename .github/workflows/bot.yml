@@ -29,8 +29,3 @@ jobs:
       env:
         COOKIES_JSON: ${{ secrets.COOKIES_JSON }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: |
-        # Временно убираем бесконечный цикл из main.py
-        # Создаем временную копию без while True
-        sed '/while True:/,/^[[:space:]]*$/d' main.py > single_run.py
-        python single_run.py
