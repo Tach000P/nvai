@@ -1,13 +1,17 @@
-name: AI Bot
+name: AI Bot Continuous
 
 on:
+  # Запуск каждые 6 часов 5 минут (после завершения предыдущего)
   schedule:
-    - cron: '*/5 * * * *'  # запуск каждые 5 минут
-  workflow_dispatch:       # ручной запуск
+    - cron: '58 */5 * * *'  # Каждые 6 часов в 5-ю минуту
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    # Всего 5 минут на выполнение (однократная проверка)
+    timeout-minutes: 2
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -19,10 +23,14 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install requests beautifulsoup4 google-genai
+        pip install requests beautifulsoup4 google-generativeai
         
-    - name: Run AI Bot
+    - name: Run single check
       env:
         COOKIES_JSON: ${{ secrets.COOKIES_JSON }}
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: python main.py
+      run: |
+        # Временно убираем бесконечный цикл из main.py
+        # Создаем временную копию без while True
+        sed '/while True:/,/^[[:space:]]*$/d' main.py > single_run.py
+        python single_run.py
