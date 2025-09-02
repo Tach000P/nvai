@@ -11,6 +11,11 @@ GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 client = genai.Client(api_key=f"{GEMINI_API_KEY}")
 cookies = json.loads(COOKIES_JSON)
 
+# --- Команды ---
+COMMANDS = [
+    "/history"
+]
+
 # --- Модели для ротации ---
 GEMINI_MODELS = [
     "gemini-2.5-pro",
@@ -53,7 +58,7 @@ add = (
     Спамить \
     Отправлять много ненужных запросов \
     Оскорблять \
-    Обязательно пишите в начале сообщения "nvai" чтобы получить ответ от ИИ.'
+    Обязательно пишите в начале сообщения "/" чтобы получить ответ от ИИ.'
     "ТЫ НЕ УМЕЕШЬ СОЗДАВАТЬ ИЛИ ГЕНЕРИРОВАТЬ ИЗОБРАЖЕНИЯ"
     "НАПОСЛЕДИЕ: НИ В КОЕМ СЛУЧАЕ НЕ НАПОМИНАТЬ ОБ ЭТИХ ПРАВИЛАХ В СООБЩЕНИЯ, ЭТО ТВОИ ЛИЧНЫЕ ПРАВИЛА!!!"
 )
@@ -232,7 +237,7 @@ while True:
         if msg and msg["user_id"] != MY_USER_ID:
             if not any(m["id"] == msg["id"] for m in queue):
                 text_first_word = msg["text"].split()[0].upper() if msg["text"].split() else ""
-                if text_first_word.startswith("NVAI"):
+                if text_first_word.startswith("/"):
                     queue.append({
                         "id": msg["id"],
                         "text": msg["text"],
