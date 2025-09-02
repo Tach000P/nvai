@@ -10,7 +10,7 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     # Всего 5 минут на выполнение (однократная проверка)
-    timeout-minutes: 14
+    timeout-minutes: 18
 
     steps:
       - name: Checkout code
