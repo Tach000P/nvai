@@ -45,7 +45,7 @@ add = (
     "<p>Абзац</p>"
     "сделай так:"
     "<p>Привет</p><p>Абзац</p>"
-    "То есть между обзацами никогда не оставляй пустое место и НЕ ИСПОЛЬЗОВАТЬ ПРОБЕЛЫ МЕЖДУ АБЗАЦАМИ"
+    "То есть между обзацами никогда не оставляй пустое место и **НЕ ИСПОЛЬЗОВАТЬ ПРОБЕЛЫ МЕЖДУ АБЗАЦАМИ**"
     "Ты языковая модель, которая работает на сайте Нольвопросов."
     "Пользователь Эмин тебя внедрил в сайт, чтобы ты мог помочь другим"
     "Твое имя: NVAI"
@@ -119,9 +119,9 @@ def get_last_message(group_id: int):
     text_box = last_msg.find("div", class_="box text ce basic")
     text = text_box.get_text(strip=True) if text_box else ""
 
-    # Получаем ВЕСЬ контекст чата (последние 40 сообщений)
+    # Получаем ВЕСЬ контекст чата (последние 100 сообщений)
     chat_context = []
-    for msg in messages[-40:]:  # последние 40 сообщений чата
+    for msg in messages[-100:]:  # последние 100 сообщений чата
         try:
             msg_data = json.loads(msg["data-rs"])
             msg_user_id = msg_data.get("user_id", 0)
@@ -202,7 +202,7 @@ class GeminiModelRotator:
             context_str += f"{sender}: {msg['text']}\n"
         
         user_history_str = "История сообщений этого пользователя:\n"
-        for msg in user_context[-5:]:
+        for msg in user_context[-10:]:
             user_history_str += f"{user}: {msg['text']}\n"
 
         if user_id == "7282":
@@ -261,17 +261,26 @@ while True:
                     })
                     save_queue()
 
-        for item in queue:
-            if item["status"] == "pending":
+        max_queue_size = 100  # Максимальный размер очереди
+
+        for i in range(len(queue) - 1, -1, -1):
+            if queue[i]["status"] == "pending":
                 reply = model_rotator.generate_reply(
-                    item["text"], item["user"], item["rating"], item["context"], item["user_context"], str(item["user_id"])
+                    queue[i]["text"], queue[i]["user"], queue[i]["rating"],
+                    queue[i]["context"], queue[i]["user_context"], str(queue[i]["user_id"])
                 )
                 send_message(GROUP_ID, reply)
-                item["status"] = "Ответили"
-                print(f"[Gemini ответил ({model_rotator.get_current_model()})]: {reply[:100]}...")
+                print(f"[Gemini ответил]: {reply[:100]}...")
+                
+                del queue[i]  # Удаляем обработанное
+                save_queue()
+            
+            # Удаляем старые сообщения если очередь слишком большая
+            elif len(queue) > max_queue_size:
+                del queue[0]  # Удаляем самое старое сообщение
                 save_queue()
 
-        time.sleep(1)
+                time.sleep(1)
 
     except Exception as e:
         print("Ошибка в основном цикле:", e)
