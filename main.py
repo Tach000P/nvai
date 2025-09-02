@@ -110,9 +110,9 @@ def get_last_message(group_id: int):
     text_box = last_msg.find("div", class_="box text ce basic")
     text = text_box.get_text(strip=True) if text_box else ""
 
-    # Получаем ВЕСЬ контекст чата (последние 20 сообщений)
+    # Получаем ВЕСЬ контекст чата (последние 40 сообщений)
     chat_context = []
-    for msg in messages[-20:]:  # последние 20 сообщений чата
+    for msg in messages[-40:]:  # последние 40 сообщений чата
         try:
             msg_data = json.loads(msg["data-rs"])
             msg_user_id = msg_data.get("user_id", 0)
@@ -206,7 +206,7 @@ class GeminiModelRotator:
             {add}
             """
         
-        for attempt in range(3):
+        for attempt in range(7):
             try:
                 current_model = self.get_current_model()
                 response = client.models.generate_content(
