@@ -256,7 +256,7 @@ while True:
         for item in queue:
             if item["status"] == "pending":
                 reply = model_rotator.generate_reply(
-                    item["text"], item["user"], item["rating"], item["context"], item["user_context"], f"{item["user_id"]}"
+                    item["text"], item["user"], item["rating"], item["context"], item["user_context"], str(item["user_id"])
                 )
                 send_message(GROUP_ID, reply)
                 item["status"] = "Ответили"
