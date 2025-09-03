@@ -1,16 +1,16 @@
 name: AI Bot Continuous
 
 on:
-  # Запуск каждые 5 минут (после завершения предыдущего)
+  # Запуск каждые 20 минут (после завершения предыдущего)
   schedule:
-    - cron: "*/15 * * * *" # Каждые 5
+    - cron: "*/20 * * * *" # Каждые 20
   workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     # Всего 5 минут на выполнение (однократная проверка)
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout code
