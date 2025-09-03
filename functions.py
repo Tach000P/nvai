@@ -77,7 +77,7 @@ def functions(f: str, c: str):
         for i in range(0, len(names)):
             result.append(f"<li><b>{names[i]}</b> — {roles[i]}</li>")
 
-        return f"<blockquote>Все пользователи группы:</blockquote><ol>{"".join(result)}</ol>"
+        return f"<blockquote>Все пользователи группы:</blockquote><ol>{''.join(result)}</ol>"
     
     elif f == "/randomNum":
 
@@ -100,7 +100,7 @@ def functions(f: str, c: str):
         return f"""
             Все конманды:
             <ul>
-                {"".join(commands)}
+                {''.join(commands)}
                 <li>/ — ответ от стандартного ИИ</li>
                 <li>// — ответ от умного ИИ</li>
                 <li>/// — ответ от самого продвинутого ИИ</li>
@@ -138,4 +138,4 @@ def functions(f: str, c: str):
         for i in range(0, len(container.contents)):
             tags.append(f"{container.contents[i]}")
         
-        return f"{"".join(tags)}"
+        return f"{''.join(tags)}"
