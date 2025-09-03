@@ -1,4 +1,4 @@
-import time
+import time, os
 from huggingface_hub import InferenceClient
 from rules import rules
 # from google import genai
@@ -6,8 +6,11 @@ from rules import rules
 # --- Gemini ---
 # GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 # client = genai.Client(api_key=f"{GEMINI_API_KEY}")
+
+HG_API_KEY = os.environ.get('HG_API_KEY', '')
+
 client = InferenceClient(
-    api_key="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"
+    api_key=f"{HG_API_KEY}"
 )
 
 
