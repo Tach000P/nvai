@@ -3,7 +3,7 @@ name: AI Bot Continuous
 on:
   # Запуск каждые 15 минут (после завершения предыдущего)
   schedule:
-    - cron: "30 * * * *" # Каждые 15
+    - cron: "31 * * * *" # Каждые 15
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests beautifulsoup4 google-genai
+          pip install requests beautifulsoup4 huggingface_hub
 
       - name: Run single check
         env:
