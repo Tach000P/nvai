@@ -12,7 +12,7 @@ HG_API_KEY = os.environ.get('HG_API_KEY', '')
 client = InferenceClient(
     api_key=f"{HG_API_KEY}"
 )
-
+#
 
 # --- Пользователи, которым доступен модель LLAMA-70B ---
 VIP_USERS = ("7282")
