@@ -95,17 +95,18 @@ def functions(f: str, c: str):
         commands = []
 
         for i in range(1, len(FUNCTIONS)):
-            commands.append(f"<i>{FUNCTIONS[i]} — {functions_descriptions[i]}</i>")
+            commands.append(f"<li>{FUNCTIONS[i]} — {functions_descriptions[i]}</li>")
 
-        return f"""
-            Все конманды:
-            <ul>
-                {''.join(commands)}
-                <li>/ — ответ от стандартного ИИ</li>
-                <li>// — ответ от умного ИИ</li>
-                <li>/// — ответ от самого продвинутого ИИ</li>
-            </ul>
-        """
+        return(
+            "Все конманды:"
+            "<ul>"
+                f"{''.join(commands)}"
+                "<li>/ — ответ от стандартного ИИ</li>"
+                "<li>// — ответ от умного ИИ</li>"
+                "<li>/// — ответ от самого продвинутого ИИ</li>"
+            "</ul>"
+        )
+        
     elif f == "/about":
         return(
             "<p><b>Информация о NVAi:</b></p>"

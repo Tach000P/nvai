@@ -1,9 +1,8 @@
 name: AI Bot Continuous
 
 on:
-  # Запуск каждые 15 минут (после завершения предыдущего)
   schedule:
-    - cron: "35 * * * *" # Каждые 15
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
