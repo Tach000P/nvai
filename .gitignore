@@ -15,3 +15,9 @@ secrets.py
 
 # Test
 test.py
+
+# Old sccripts
+# model_rotator.py
+
+# Updates
+generate_text.py

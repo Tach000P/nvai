@@ -1,5 +1,4 @@
 requests
 beautifulsoup4
 google-genai
-huggingface_hub
 Pillow
