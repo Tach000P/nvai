@@ -8,7 +8,7 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 59
+    timeout-minutes: 58
 
     steps:
       - name: Checkout code
@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests beautifulsoup4 google-genai huggingface_hub
+          pip install requests beautifulsoup4 google-genai
 
       - name: Run single check
         env:
