@@ -12,3 +12,6 @@ secrets.py
 # IDE
 .vscode/
 .idea/
+
+# Test
+test.py

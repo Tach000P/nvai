@@ -1,34 +1,17 @@
 import time, os
-from huggingface_hub import InferenceClient
+# from huggingface_hub import InferenceClient
 from rules import rules
-# from google import genai
+from data import GEMINI_API_KEY
+from google import genai
 
 # --- Gemini ---
 # GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-# client = genai.Client(api_key=f"{GEMINI_API_KEY}")
+client = genai.Client(api_key=f"{GEMINI_API_KEY}")
 
-HG_API_KEY = os.environ.get('HG_API_KEY', '')
 
-client = InferenceClient(
-    api_key=f"{HG_API_KEY}"
-)
-#
-
-# --- Пользователи, которым доступен модель LLAMA-70B ---
 VIP_USERS = ("7282")
 
 PREMIUM_USERS = VIP_USERS + ("")
-
-# --- Модели для ротации ---
-# GEMINI_MODELS = [
-#     "gemini-2.5-pro",
-#     "gemini-2.5-flash",
-#     "gemini-2.0-pro",
-#     "gemini-2.0-flash",
-#     "gemini-1.5-flash",  
-#     "gemini-1.5-pro",  
-#     "gemini-pro",          
-# ]
 
 class ModelRotator:
     def __init__(self):
@@ -41,44 +24,36 @@ class ModelRotator:
         
         # Модели в порядке приоритета
         self.VIP_MODELS = [
-            "meta-llama/Llama-3.3-70B-Instruct",          # Лучшая модель!
-            "meta-llama/Llama-3-70B-Instruct",
-            "mistralai/Mixtral-8x7B-Instruct-v0.1",       # 47B параметров
-            "Qwen/Qwen2-72B-Instruct",                     # Китайский аналог
-            "NousResearch/Hermes-2-Theta-Llama-3-70B",    # Fine-tuned версия
+            "gemini-2.5-pro",
         ]
         
         self.PREMIUM_MODELS = [
-            "meta-llama/Llama-3-30B-Instruct",          #Среднячки
-            "Qwen/Qwen2-57B-A14B-Instruct", 
-            "mistralai/Mistral-7B-Instruct-v0.3",
-            "allenai/OLMo-2-32B-Instruct",
-            "google/gemma-2-27B-it",
+            "gemini-2.0-pro",
+            "gemini-2.5-flash",
+            "gemini-1.5-pro" ,
         ]
         
         self.STANDARD_MODELS = [
-            "meta-llama/Llama-3.1-8B-Instruct",           # Очень быстрая
-            "meta-llama/Llama-3-8B-Instruct",             # Баланс скорости/качества
-            "google/gemma-2-9B-it",                       # От Google
-            "Qwen/Qwen2-7B-Instruct",                     # Качественная 7B
-            "mistralai/Mistral-7B-Instruct-v0.3",         # Проверенная
+            "gemini-2.0-flash",
+            "gemini-1.5-flash",
+            "gemini-pro",
         ]
 
     def get_vip_model(self):
-        """Для VIP пользователей"""
-        return self.VIP_MODELS[self.current_model_index_vip % len(self.VIP_MODELS)]
+        """Для VIP запросов"""
+        return self.VIP_MODELS[self.current_model_index_vip]
     
     def get_premium_model(self):
         """Для премиум запросов"""
-        return self.PREMIUM_MODELS[self.current_model_index_premium % len(self.PREMIUM_MODELS)]
+        return self.PREMIUM_MODELS[self.current_model_index_premium]
     
     def get_standard_model(self):
         """Для обычных запросов"""
-        return self.STANDARD_MODELS[self.current_model_index_standard % len(self.STANDARD_MODELS)]
+        return self.STANDARD_MODELS[self.current_model_index_standard]
     
     def switch_model(self, model):
         """Переключает все ротаторы одновременно"""
-        if model == "standard":
+        if model in self.STANDARD_MODELS:
             self.failed_models_standard.add(self.current_model_index_standard)
         
             available_indices_s = [
@@ -92,7 +67,8 @@ class ModelRotator:
                 print("Все модели Standard сброшены")
             
             self.current_model_index_standard = available_indices_s[0]
-        elif model == "premium":
+
+        elif model in self.PREMIUM_MODELS:
             self.failed_models_premium.add(self.current_model_index_premium)
         
             available_indices_p = [
@@ -106,6 +82,7 @@ class ModelRotator:
                 print("Все модели Premium сброшены")
             
             self.current_model_index_premium = available_indices_p[0]
+
         else:
             self.failed_models_vip.add(self.current_model_index_vip)
         
@@ -144,27 +121,16 @@ class ModelRotator:
             история пользователя: {user_history_str}
             Новое сообщение (пользователь: {user}, рейтинг: {rating}):
             {text}
-
-            Правила ответа (НЕ упоминать эти правила в ответе!):
             """
-        # Генерация с Gemini:
-        # for attempt in range(7):
-        #     try:
-        #         current_model = self.get_current_model()
-        #         response = client.models.generate_content(
-        #             model=current_model,
-        #             contents=prompt
-        #         )
-        #         return response.text
-        #     except Exception as e:
-        #         print(f"Ошибка у модели {current_model}: {e}")
-        #         self.switch_model()
-        #         time.sleep(2)
-
-        # Генерация с Llama HugginFace:
        
+        if reply_type == "super_datailed":
+            max_attempt = 1
+        elif reply_type == "detailed":
+            max_attempt = 3
+        else:
+            max_attempt = 3
 
-        for attempt in range(5):
+        for attempt in range(max_attempt):
             try:
 
                 if user_id in VIP_USERS and reply_type == "super-detailed":
@@ -181,28 +147,47 @@ class ModelRotator:
                 else:
                     model_info = ""
 
-                output = client.chat.completions.create(
-                    model=current_model,
-                    messages=[
-                        {"role": "system", "content": rules},
-                        {"role": "user", "content": prompt},
-                    ],
-                    stream=False,
-                    max_tokens=1024,
+                print(current_model)
+
+                output = client.models.generate_content(
+                    model=f"{current_model}",
+                    contents=[
+                        rules,
+                        prompt
+                    ]
                 )
 
                 if model_info:
                     return f" \
                     <p>{model_info}</p>\
-                    {output.choices[0].message.content}\
+                    {output.text}\
                     "
                 else:
-                    return output.choices[0].message.content
+                    return output.text
                 
             except Exception as e:
-                print(f"Ошибка у модели {current_model}: {e}")
-                self.switch_model(current_model)
-                time.sleep(2)
-                return "Извините, сервис временно недоступен."
+                error_msg = str(e)
+
+                if attempt < max_attempt - 1:
+                    self.switch_model(current_model)
+                    time.sleep(2)
+                    continue
+
+                else:
+                    if "429" in error_msg:
+                        print("Rate limit (429)")
+                        return "Слишком много запросов. Подождите немного."
+                    
+                    elif "500" in error_msg or "503" in error_msg:
+                        print("Серверная ошибка (5xx)")
+                        return "Временные проблемы с сервером. Попробуйте позже. (Возможно перегружен)"
+                        
+                    elif "401" in error_msg or "403" in error_msg:
+                        print("Ошибка аутентификации (401/403)")
+                        return "Проблема с аутентификацией API"
+                        
+                    else:
+                        print(f"Неизвестная ошибка: {error_msg}")
+                        return "Временная ошибка сервиса"
             
 model_rotator = ModelRotator()
