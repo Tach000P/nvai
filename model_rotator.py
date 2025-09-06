@@ -3,7 +3,7 @@ import time, os
 from rules import rules
 from data import GEMINI_API_KEY
 from google import genai
-from google import types
+from google.genai import types
 
 # --- Gemini ---
 # GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
