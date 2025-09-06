@@ -36,20 +36,16 @@ class ModelRotator:
         
         # Модели в порядке приоритета
         self.VIP_MODELS = [
-            "gemini-2.5-pro",
         ]
         
         self.PREMIUM_MODELS = [
+            "gemini-2.5-pro",
             "gemini-2.0-pro",
-            "gemini-2.5-flash",
             "gemini-1.5-pro" ,
         ]
         
         self.STANDARD_MODELS = [
-            "gemini-2.5-pro",
-            "gemini-2.0-pro",
             "gemini-2.5-flash",
-            "gemini-1.5-pro" ,
             "gemini-2.0-flash",
             "gemini-1.5-flash",
         ]
@@ -148,19 +144,12 @@ class ModelRotator:
         for attempt in range(max_attempt):
             try:
 
-                if user_id in VIP_USERS and reply_type == "super-detailed":
-                    current_model = model_rotator.get_vip_model()
-                elif user_id in PREMIUM_USERS and reply_type == "detailed":
-                    current_model = model_rotator.get_premium_model() 
+                # if user_id not in VIP_USERS and reply_type == "super-detailed":
+                #     model_info = "Функция доступна только VIP пользователям. Свяжитесь с администраторам группы, чтобы получить VIP статус"
+                if reply_type == "detailed":
+                    current_model = self.get_premium_model()
                 else:
-                    current_model = model_rotator.get_standard_model()
-
-                if user_id not in VIP_USERS and reply_type == "super-detailed":
-                    model_info = "Функция доступна только VIP пользователям. Свяжитесь с администраторам группы, чтобы получить VIP статус"
-                elif user_id not in PREMIUM_USERS and reply_type == "detailed":
-                    model_info = "Функция доступна только PREMIUM пользователям. Свяжитесь с администраторам группы, чтобы получить PREMIUM статус"
-                else:
-                    model_info = ""
+                    current_model = self.get_standard_model()
 
                 print(current_model)
 
@@ -170,13 +159,7 @@ class ModelRotator:
                     config=config,
                 )
 
-                if model_info:
-                    return f" \
-                    <p>{model_info}</p>\
-                    {output.text}\
-                    "
-                else:
-                    return output.text
+                return output.text
                 
             except Exception as e:
                 error_msg = str(e)

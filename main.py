@@ -118,7 +118,7 @@ while True:
 
                 text_first_word = msg["text"].split()[0].upper() if msg["text"].split() else ""
 
-                reply_type = "super-detailed" if text_first_word.startswith("///") else "detailed" if text_first_word.startswith("//") else "standard"
+                reply_type = "detailed" if text_first_word.startswith("//") else "standard"
 
                 if text_first_word.startswith("/"):
                     queue.append({
