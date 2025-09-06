@@ -14,7 +14,8 @@ grounding_tool = types.Tool(
 )
 
 config = types.GenerateContentConfig(
-    tools=[grounding_tool]
+    tools=[grounding_tool],
+    system_instruction=rules
 )
 
 VIP_USERS = ("7282")
@@ -159,10 +160,7 @@ class ModelRotator:
 
                 output = client.models.generate_content(
                     model=f"{current_model}",
-                    contents=[
-                        rules,
-                        prompt
-                    ],
+                    contents=prompt,
                     config=config,
                 )
 
