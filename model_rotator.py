@@ -18,9 +18,11 @@ config = types.GenerateContentConfig(
     system_instruction=rules
 )
 
-VIP_USERS = ("7282")
 
-PREMIUM_USERS = VIP_USERS + ("")
+PREMIUM_USERS = ("7282")
+
+VIP_USERS = PREMIUM_USERS
+
 
 class ModelRotator:
 
@@ -44,6 +46,10 @@ class ModelRotator:
         ]
         
         self.STANDARD_MODELS = [
+            "gemini-2.5-pro",
+            "gemini-2.0-pro",
+            "gemini-2.5-flash",
+            "gemini-1.5-pro" ,
             "gemini-2.0-flash",
             "gemini-1.5-flash",
         ]

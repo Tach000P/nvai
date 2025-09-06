@@ -59,9 +59,9 @@ def get_last_message(group_id: int):
     text_box = last_msg.find("div", class_="box text ce basic")
     text = text_box.get_text(strip=True) if text_box else ""
 
-    # Получаем ВЕСЬ контекст чата (последние 50 сообщений)
+    # Получаем ВЕСЬ контекст чата (последние 40 сообщений)
     chat_context = []
-    for msg in messages[-50:]:  # последние 50 сообщений чата
+    for msg in messages[-40:]:  # последние 40 сообщений чата
         try:
             msg_data = json.loads(msg["data-rs"])
             msg_user_id = msg_data.get("user_id", 0)
