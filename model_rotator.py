@@ -3,17 +3,27 @@ import time, os
 from rules import rules
 from data import GEMINI_API_KEY
 from google import genai
+from google import types
 
 # --- Gemini ---
 # GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 client = genai.Client(api_key=f"{GEMINI_API_KEY}")
 
+grounding_tool = types.Tool(
+    google_search=types.GoogleSearch()
+)
+
+config = types.GenerateContentConfig(
+    tools=[grounding_tool]
+)
 
 VIP_USERS = ("7282")
 
 PREMIUM_USERS = VIP_USERS + ("")
 
 class ModelRotator:
+
+
     def __init__(self):
         self.current_model_index_standard = 0
         self.current_model_index_premium = 0
@@ -36,7 +46,6 @@ class ModelRotator:
         self.STANDARD_MODELS = [
             "gemini-2.0-flash",
             "gemini-1.5-flash",
-            "gemini-pro",
         ]
 
     def get_vip_model(self):
@@ -154,7 +163,8 @@ class ModelRotator:
                     contents=[
                         rules,
                         prompt
-                    ]
+                    ],
+                    config=config,
                 )
 
                 if model_info:
