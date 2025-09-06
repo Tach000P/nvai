@@ -59,9 +59,9 @@ def get_last_message(group_id: int):
     text_box = last_msg.find("div", class_="box text ce basic")
     text = text_box.get_text(strip=True) if text_box else ""
 
-    # Получаем ВЕСЬ контекст чата (последние 100 сообщений)
+    # Получаем ВЕСЬ контекст чата (последние 50 сообщений)
     chat_context = []
-    for msg in messages[-100:]:  # последние 100 сообщений чата
+    for msg in messages[-50:]:  # последние 50 сообщений чата
         try:
             msg_data = json.loads(msg["data-rs"])
             msg_user_id = msg_data.get("user_id", 0)
@@ -134,7 +134,7 @@ while True:
                     })
                     save_queue()
 
-        max_queue_size = 25  # Максимальный размер очереди
+        max_queue_size = 20  # Максимальный размер очереди
 
         for i in range(len(queue) - 1, -1, -1):
 
