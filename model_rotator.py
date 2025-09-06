@@ -23,7 +23,6 @@ PREMIUM_USERS = VIP_USERS + ("")
 
 class ModelRotator:
 
-
     def __init__(self):
         self.current_model_index_standard = 0
         self.current_model_index_premium = 0
