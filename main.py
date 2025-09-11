@@ -8,7 +8,7 @@ from data import cookies, MY_USER_ID, GROUP_ID, FUNCTIONS_LIST, QUEUE_FILE
 from functions import functions
 
 headers = {
-    "User-Agent": "Chrome/139.0.0.0",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36",
     "Referer": f"https://nolvoprosov.ru/groups/{GROUP_ID}",
 }
 
