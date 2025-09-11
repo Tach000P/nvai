@@ -19,24 +19,15 @@ config = types.GenerateContentConfig(
 )
 
 
-PREMIUM_USERS = ("7282")
-
-VIP_USERS = PREMIUM_USERS
-
-
 class ModelRotator:
 
     def __init__(self):
         self.current_model_index_standard = 0
         self.current_model_index_premium = 0
-        self.current_model_index_vip = 0
         self.failed_models_standard = set()
         self.failed_models_premium = set()
-        self.failed_models_vip = set()
         
         # Модели в порядке приоритета
-        self.VIP_MODELS = [
-        ]
         
         self.PREMIUM_MODELS = [
             "gemini-2.5-pro",
@@ -49,10 +40,6 @@ class ModelRotator:
             "gemini-2.0-flash",
             "gemini-1.5-flash",
         ]
-
-    def get_vip_model(self):
-        """Для VIP запросов"""
-        return self.VIP_MODELS[self.current_model_index_vip]
     
     def get_premium_model(self):
         """Для премиум запросов"""
@@ -93,21 +80,6 @@ class ModelRotator:
                 print("Все модели Premium сброшены")
             
             self.current_model_index_premium = available_indices_p[0]
-
-        else:
-            self.failed_models_vip.add(self.current_model_index_vip)
-        
-            available_indices_v = [
-                i for i in range(len(self.VIP_MODELS))
-                if i not in self.failed_models_vip
-            ]
-        
-            if not available_indices_v:
-                self.failed_models_vip.clear()
-                available_indices_v = list(range(len(self.VIP_MODELS)))
-                print("Все модели Vip сброшены")
-            
-            self.current_model_index_vip = available_indices_v[0]
 
     def generate_reply(self, text: str, user: str, rating: str, context: list, user_context: list, user_id: str, reply_type: str) -> str:
         """Генерация ответа"""

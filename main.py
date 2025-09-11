@@ -4,11 +4,11 @@ import json
 import os
 from bs4 import BeautifulSoup
 from model_rotator import model_rotator
-from data import cookies, MY_USER_ID, GROUP_ID, FUNCTIONS, QUEUE_FILE
+from data import cookies, MY_USER_ID, GROUP_ID, FUNCTIONS_LIST, QUEUE_FILE
 from functions import functions
 
 headers = {
-    "User-Agent": "Mozilla/5.0",
+    "User-Agent": "Chrome/139.0.0.0",
     "Referer": f"https://nolvoprosov.ru/groups/{GROUP_ID}",
 }
 
@@ -144,7 +144,7 @@ while True:
             if queue[i]["status"] == "pending":
 
                 # --- Проверяем, функция ли это ---
-                if text_first_word in FUNCTIONS:
+                if text_first_word.upper() in FUNCTIONS_LIST:
                     reply = functions(text_first_word, text_second_word)
 
                 else:

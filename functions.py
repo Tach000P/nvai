@@ -1,4 +1,4 @@
-from data import GROUP_ID, cookies, FUNCTIONS
+from data import GROUP_ID, cookies, FUNCTIONS_TEXT
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -95,8 +95,8 @@ def functions(f: str, c: str):
 
         commands = []
 
-        for i in range(1, len(FUNCTIONS)):
-            commands.append(f"<li>{FUNCTIONS[i]} — {functions_descriptions[i]}</li>")
+        for i in range(1, len(FUNCTIONS_TEXT)):
+            commands.append(f"<li>{FUNCTIONS_TEXT[i]} — {functions_descriptions[i]}</li>")
 
         return(
             "Все конманды:"

@@ -19,4 +19,5 @@ cookies = json.loads(COOKIES_JSON)
 GROUP_ID = 352
 MY_USER_ID = 8724
 QUEUE_FILE = "queue.json"  # файл для сохранения очереди
-FUNCTIONS = ["/randomUser", "/randomNum [число]", "/allUsers", "/about", "/rules", "/help", "@ [текст]"]
+FUNCTIONS_TEXT = ["/randomUser", "/randomNum [число]", "/allUsers", "/about", "/rules", "/help", "@ [текст]"]
+FUNCTIONS_LIST = ["/RANDOMUSER", "/RANDOMNUM", "/ALLUSERS", "/ABOUT", "/RULES", "/HELP"]
