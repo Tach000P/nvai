@@ -1,8 +1,7 @@
-from data import GROUP_ID, cookies, FUNCTIONS_TEXT
 from bs4 import BeautifulSoup
 import os, json, random, requests, asyncio
 from google import genai
-from data import GEMINI_API_KEY, NINJAS_API_KEY
+from data import *
 from google.genai import types
 from mems import *
 from rules import rules
@@ -10,36 +9,41 @@ from googletrans import Translator
 
 client = genai.Client(api_key=f"{GEMINI_API_KEY}")
 
+grounding_tool = types.Tool(
+    google_search=types.GoogleSearch()
+)
+
 answers_config = types.GenerateContentConfig(
-    system_instruction="Проанализируй ответы пользователя и создай смешную шуточную фразу в третьем лице, которая обыграет его стиль общения/темы. Избегай общих фраз — только конкретика и юмор based на его ответах. Маты разрешены"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Проанализируй ответы пользователя и создай смешную шуточную фразу в третьем лице, которая обыграет его стиль общения/темы. Избегай общих фраз — только конкретика и юмор based на его ответах. Маты разрешены"
 )
 
 questions_config = types.GenerateContentConfig(
-    system_instruction="Проанализируй вопросы пользователя и создай шуточную фразу в третьем лице. Не пытайся задеть его - просто фраза с сарказмом в шуточном стиле. Маты разрешены"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Проанализируй вопросы пользователя и создай шуточную фразу в третьем лице. Не пытайся задеть его - просто фраза с сарказмом в шуточном стиле. Маты разрешены"
 )
 
 hidden_talent_config = types.GenerateContentConfig(
-    system_instruction="Создай очень короткую фразу о скрытом таланте пользователя, исходя от его вопросов и ответов. Фраза должна быть шуточным"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Создай очень короткую фразу о скрытом таланте пользователя, исходя от его вопросов и ответов. Фраза должна быть шуточным"
 )
 
 toxic_config = types.GenerateContentConfig(
-    system_instruction="предложением, который состоит не более из пяти слов, описуй его токсичность ответов. Шутки, сарказм и маты разрешены"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! предложением, который состоит не более из пяти слов, описуй его токсичность ответов. Шутки, сарказм и маты разрешены"
 )
 
 duel_config = types.GenerateContentConfig(
-    system_instruction="Сделать дуэль между двумя людьми, имена которых заданы в начале текста и придумать абсурдную причину победы одного, поражения или ничьи. В дуэле должны быть раунды, тоже шуточные и абсурдные, конечно, но эпичные, с действиями и желательно с боями. Сарказм, маты и шутки разрешены. ВАЖНО: Не упоминать про абсурдность в тексте"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Сделать дуэль между двумя людьми, имена которых заданы в начале текста и придумать абсурдную причину победы одного, поражения или ничьи. В дуэле должны быть раунды, тоже шуточные и абсурдные, конечно, но эпичные, с действиями и желательно с боями. Сарказм, маты и шутки разрешены. ВАЖНО: Не упоминать про абсурдность в тексте"
 )
 
 love_config = types.GenerateContentConfig(
-    system_instruction="Ты должен создать краткое объяснение, почему 2 человека подходят или не подходят друг к другу, и определить уровень совместимости. Можешь придумать что угодно, главное - смешное и мемное. Сарказм и маты разрешены. ВАЖНО: укажи уровень совместимости и почему именно столько"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Ты должен создать краткое объяснение, почему 2 человека подходят или не подходят друг к другу, и определить уровень совместимости. Можешь придумать что угодно, главное - смешное и мемное. Сарказм и маты разрешены. ВАЖНО: укажи уровень совместимости и почему именно столько"
 )
 
 horoscope_config = types.GenerateContentConfig(
-    system_instruction="Выдать абсурдное предсказание на день, никак не связанное с реальностью. Сарказм, черный юмор и маты разрешены"
+    tools=[grounding_tool],
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Выдать абсурдное предсказание на день, никак не связанное с реальностью. Сарказм, черный юмор и маты разрешены"
 )
 
 fact_config = types.GenerateContentConfig(
-    system_instruction="100% выдуманный, но правдоподобно звучащий факт. Сарказм, маты, черный юмор - разрешены"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! 100% выдуманный, но правдоподобно звучащий факт. Сарказм, маты, черный юмор - разрешены"
 )
 
 user_agent = "Mozilla/5.0"
@@ -77,11 +81,6 @@ def generate_text(content, config):
 def get_answers(id):
     url_user = f"https://nolvoprosov.ru/users/{id}/questions/answers"
 
-    headers = {
-        "User-Agent": user_agent,
-        "Referer": url_user,
-    }
-
     r = session.get(url_user, headers=headers)
     r.raise_for_status()
 
@@ -96,12 +95,8 @@ def get_answers(id):
     return answers_text
 
 def get_questions(id):
-    url_user = f"https://nolvoprosov.ru/users/{id}/questions"
 
-    headers = {
-        "User-Agent": user_agent,
-        "Referer": url_user,
-    }
+    url_user = f"https://nolvoprosov.ru/users/{id}/questions"
 
     r = session.get(url_user, headers=headers)
     r.raise_for_status()
@@ -120,11 +115,6 @@ def get_profile(id: str):
 
     url_user = f"https://nolvoprosov.ru/users/{id}"
 
-    headers = {
-        "User-Agent": user_agent,
-        "Referer": url_user,
-    }
-
     r = session.get(url_user, headers=headers)
     r.raise_for_status()
 
@@ -138,11 +128,6 @@ def get_all_users(t: str):
     """Парсим страницу и достаем список пользователей"""
 
     url_members = f"https://nolvoprosov.ru/groups/{GROUP_ID}/members"
-
-    headers = {
-        "User-Agent": user_agent,
-        "Referer": url_members,
-    }
 
     r = session.get(url_members, headers=headers)
     r.raise_for_status()
@@ -251,11 +236,6 @@ def functions(f: str, c1="", c2="", text1="", text2="", text3=""):
 
         url_rules = f"https://nolvoprosov.ru/groups/{GROUP_ID}/rules"
 
-        headers = {
-            "User-Agent": user_agent,
-            "Referer": url_rules,
-        }
-
         r = session.get(url_rules, headers=headers)
         r.raise_for_status()
 
@@ -322,19 +302,19 @@ def functions(f: str, c1="", c2="", text1="", text2="", text3=""):
 
             toxicity = generate_text(content=answers_content, config=toxic_config)
 
-            result = f"""
-                <b>ДОСЬЕ НА {name}</b>
-                <ol>
-                    <li><b>Онлайн:</b> {isOnline}</li>
-                    <li><b>Место в рейтинге:</b> {rating}</li>
-                    <li><b>Тип ответов:</b> {answers_type}</li>
-                    <li><b>Тип вопросов:</b> {questions_type}</li>
-                    <li><b>Любимый вид пельменей:</b> {random.choice(pelmeni_jokes)}</li>
-                    <li><b>IQ по версии кота:</b> {random.randint(70, 140)}</li>
-                    <li><b>Скрытый талант:</b> {hidden_talent}</li>
-                    <li><b>Уровень токсичности:</b> {toxicity}</li>
-                </ol>
-            """
+            result = (
+                f"<b>ДОСЬЕ НА {name}</b>"
+                "<ol>"
+                    f"<li><b>Онлайн:</b> {isOnline}</li>"
+                    f"<li><b>Место в рейтинге:</b> {rating}</li>"
+                    f"<li><b>Тип ответов:</b> {answers_type}</li>"
+                    f"<li><b>Тип вопросов:</b> {questions_type}</li>"
+                    f"<li><b>Любимый вид пельменей:</b> {random.choice(pelmeni_jokes)}</li>"
+                    f"<li><b>IQ по версии кота:</b> {random.randint(70, 140)}</li>"
+                    f"<li><b>Скрытый талант:</b> {hidden_talent}</li>"
+                    f"<li><b>Уровень токсичности:</b> {toxicity}</li>"
+                "</ol>"
+            )
 
             return result
         

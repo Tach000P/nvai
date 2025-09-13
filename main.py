@@ -1,16 +1,9 @@
-import requests
-import time
-import json
-import os
+import requests, time, json, os, random, time
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from model_rotator import model_rotator
-from data import cookies, MY_USER_ID, GROUP_ID, FUNCTIONS_LIST, QUEUE_FILE
+from data import *
 from functions import functions
-
-headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Referer": f"https://nolvoprosov.ru/groups/{GROUP_ID}",
-}
 
 session = requests.Session()
 session.cookies.update(cookies)
@@ -107,9 +100,28 @@ def send_message(group_id: int, text: str):
     r.raise_for_status()
     return r.text
 
+def get_sleep_until_7am():
+    now = datetime.now()
+    # Вычисляем время до 7:00 следующего дня
+    tomorrow_7am = now.replace(hour=7, minute=0, second=0, microsecond=0)
+    sleep_seconds = (tomorrow_7am - now).total_seconds()
+    return max(sleep_seconds, 0)  # Не меньше 0
+
+def should_skip_night():
+    now = datetime.now()
+    # Если время между 1:57 и 7:00
+    return now.hour >= 1 and now.minute >= 57 and now.hour < 7
+
 # --- Основной цикл ---
 while True:
     try:
+
+        if should_skip_night():
+            send_message(GROUP_ID, "🌙 Бот спит до 7:00")
+            exit(0)
+            time.sleep(600)
+            continue
+
         msg = get_last_message(GROUP_ID)
 
         if msg and msg["user_id"] != MY_USER_ID:
@@ -180,7 +192,7 @@ while True:
                 del queue[0]  # Удаляем самое старое сообщение
                 save_queue()
 
-                time.sleep(1)
+        time.sleep(random.randint(2, 5))
 
     except Exception as e:
         print("Ошибка в основном цикле:", e)
