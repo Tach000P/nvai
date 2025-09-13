@@ -21,10 +21,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests beautifulsoup4 google-genai
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run single check
         env:
           COOKIES_JSON: ${{ secrets.COOKIES_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NINJAS_API_KEY: ${{ secrets.NINJAS_API_KEY }}
         run: python main.py

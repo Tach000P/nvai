@@ -138,14 +138,29 @@ while True:
 
         for i in range(len(queue) - 1, -1, -1):
 
-            text_first_word = queue[i]["text"].split()[0] if queue[i]["text"].split() else ""
-            text_second_word = queue[i]["text"].split()[1] if len(queue[i]["text"].split()) > 1 else ""
+            text = queue[i]["text"]
+            text_s = text.split()
+            length = len(text_s)
+
+            command = text_s[0] if text_s else ""
+            text_first_word = text_s[1] if length > 1 else ""
+            text_second_word = text_s[2] if length > 2 else ""
+
+            # Правильное получение текста без N первых слов
+            full_text_without_first_command = " ".join(text_s[1:]) if length > 1 else ""
+            full_text_without_two_commands = " ".join(text_s[2:]) if length > 2 else ""  
+            full_text_without_three_commands = " ".join(text_s[3:]) if length > 3 else ""
 
             if queue[i]["status"] == "pending":
-
-                # --- Проверяем, функция ли это ---
-                if text_first_word.upper() in FUNCTIONS_LIST:
-                    reply = functions(text_first_word, text_second_word)
+                if command.upper() in FUNCTIONS_LIST:
+                    reply = functions(
+                        f=command.upper(), 
+                        c1=text_first_word, 
+                        c2=text_second_word, 
+                        text1=full_text_without_first_command,
+                        text2=full_text_without_two_commands,
+                        text3=full_text_without_three_commands 
+                    )
 
                 else:
                 # --- ГЕНЕРИРУЕМ ОТВЕТ ---

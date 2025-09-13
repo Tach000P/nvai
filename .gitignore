@@ -15,6 +15,7 @@ secrets.py
 
 # Test
 test.py
+toxic_checker.py
 
 # Old sccripts
 # model_rotator.py
