@@ -1,8 +1,8 @@
 import json, os
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 # --- Получить из Github Secrets ---
 COOKIES_JSON = os.getenv('COOKIES_JSON')
