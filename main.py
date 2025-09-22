@@ -24,7 +24,7 @@ def save_queue():
 def get_last_message(group_id: int):
     """Парсим страницу и достаем последнее сообщение с максимальным контекстом"""
     url = f"https://nolvoprosov.ru/groups/{group_id}"
-    r = session.get(url, headers=headers)
+    r = session.get(url)
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, "html.parser")
@@ -96,7 +96,7 @@ def send_message(group_id: int, text: str):
         "rs[plan]": "simple",
         "text": f"<p>{text}</p>",
     }
-    r = session.post(url, data=payload, headers=headers)
+    r = session.post(url, data=payload)
     r.raise_for_status()
     return r.text
 
@@ -114,12 +114,14 @@ def should_skip_night():
 
 # --- Основной цикл ---
 while True:
+
+    time.sleep(random.randint(1, 3))
+
     try:
 
         if should_skip_night():
             send_message(GROUP_ID, "🌙 Бот спит до 7:00")
-            exit(0)
-            time.sleep(600)
+            time.sleep(6000)
             continue
 
         msg = get_last_message(GROUP_ID)
@@ -192,7 +194,6 @@ while True:
                 del queue[0]  # Удаляем самое старое сообщение
                 save_queue()
 
-        time.sleep(random.randint(2, 5))
 
     except Exception as e:
         print("Ошибка в основном цикле:", e)

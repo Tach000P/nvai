@@ -50,7 +50,6 @@ class ModelRotator:
         return self.STANDARD_MODELS[self.current_model_index_standard]
     
     def switch_model(self, model):
-        """Переключает все ротаторы одновременно"""
         if model in self.STANDARD_MODELS:
             self.failed_models_standard.add(self.current_model_index_standard)
         
@@ -106,18 +105,11 @@ class ModelRotator:
             {text}
             """
        
-        if reply_type == "super_datailed":
-            max_attempt = 1
-        elif reply_type == "detailed":
-            max_attempt = 3
-        else:
-            max_attempt = 3
+        max_attempt = 3
 
-        for attempt in range(max_attempt):
+        for attempt in range(max_attempt - 1):
             try:
 
-                # if user_id not in VIP_USERS and reply_type == "super-detailed":
-                #     model_info = "Функция доступна только VIP пользователям. Свяжитесь с администраторам группы, чтобы получить VIP статус"
                 if reply_type == "detailed":
                     current_model = self.get_premium_model()
                 else:
@@ -135,6 +127,8 @@ class ModelRotator:
                 
             except Exception as e:
                 error_msg = str(e)
+
+                print(attempt, " ", max_attempt)
 
                 if attempt < max_attempt - 1:
                     self.switch_model(current_model)

@@ -5,20 +5,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Получить из Github Secrets ---
-COOKIES_JSON = os.getenv('COOKIES_JSON')
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-NINJAS_API_KEY = os.getenv('NINJAS_API_KEY')
+# COOKIES_JSON = os.getenv('COOKIES_JSON')
+# GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+# NINJAS_API_KEY = os.getenv('NINJAS_API_KEY')
 
 # --- Для локальных тестов ---
-# GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-# NINJAS_API_KEY = os.environ.get('NINJAS_API_KEY', '')
-# COOKIES_JSON = os.environ.get('COOKIES_JSON', '{}')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+NINJAS_API_KEY = os.environ.get('NINJAS_API_KEY', '')
+COOKIES_JSON = os.environ.get('COOKIES_JSON', '{}')
 
 cookies = json.loads(COOKIES_JSON)
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-    "Referer": "https://nolvoprosov.ru",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "ru-RU,ru;q=0.7",
     "Accept-Encoding": "gzip, deflate, br",
