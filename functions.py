@@ -81,7 +81,7 @@ def generate_text(content, config):
 def get_answers(id):
     url_user = f"https://nolvoprosov.ru/users/{id}/questions/answers"
 
-    r = session.get(url_user, headers=headers)
+    r = session.get(url_user)
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -98,7 +98,7 @@ def get_questions(id):
 
     url_user = f"https://nolvoprosov.ru/users/{id}/questions"
 
-    r = session.get(url_user, headers=headers)
+    r = session.get(url_user)
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -115,7 +115,7 @@ def get_profile(id: str):
 
     url_user = f"https://nolvoprosov.ru/users/{id}"
 
-    r = session.get(url_user, headers=headers)
+    r = session.get(url_user)
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -129,7 +129,7 @@ def get_all_users(t: str):
 
     url_members = f"https://nolvoprosov.ru/groups/{GROUP_ID}/members"
 
-    r = session.get(url_members, headers=headers)
+    r = session.get(url_members)
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -236,7 +236,7 @@ def functions(f: str, c1="", c2="", text1="", text2="", text3=""):
 
         url_rules = f"https://nolvoprosov.ru/groups/{GROUP_ID}/rules"
 
-        r = session.get(url_rules, headers=headers)
+        r = session.get(url_rules)
         r.raise_for_status()
 
         soup = BeautifulSoup(r.text, 'html.parser')
