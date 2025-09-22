@@ -39,7 +39,7 @@ love_config = types.GenerateContentConfig(
 
 horoscope_config = types.GenerateContentConfig(
     tools=[grounding_tool],
-    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Выдать абсурдное предсказание на день, никак не связанное с реальностью. Сарказм, черный юмор и маты разрешены"
+    system_instruction="НИ В КОЕМ СЛУЧЧАЕ НЕ ТРОГАТЬ РЕЛИГИИ! Выдать абсурдное предсказание на день, никак не связанное с реальностью. Сарказм, черный юмор и маты разрешены. НЕ ГОВОРИТЬ ЧТО ЭТО ГОРОСКОП, ПРОСТО ПРЕДЛОЖЕНИЕ С ПРЕДСКАЗАНИЕМ"
 )
 
 fact_config = types.GenerateContentConfig(
